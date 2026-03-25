@@ -8,12 +8,18 @@
 import SwiftUI
 import pokemon_shared
 import pokemon_design_system
-import pokemon_data
 
 public struct HomeScreen: View {
-    
-    public init() {}
-    
+    private let pokemonList: [Pokemon]
+
+    public init() {
+        self.pokemonList = Self.previewPokemonList
+    }
+
+    public init(pokemonList: [Pokemon]) {
+        self.pokemonList = pokemonList
+    }
+
     public var body: some View {
         createContentView()
     }
@@ -49,9 +55,7 @@ public struct HomeScreen: View {
     
     private func createMenuPokemon() -> some View {
         VStack {
-            ForEach(PokemonDataMock().getPokemonList().indices, id: \.self) { index in
-                let pokemon = PokemonDataMock().getPokemonList()[index]
-                
+            ForEach(pokemonList, id: \.id) { pokemon in
                 PokemonCard(content: createPokemonItem(pokemon: pokemon))
             }
         }
@@ -67,4 +71,25 @@ public struct HomeScreen: View {
             ListPokemonType(pokeTypes: pokemon.types)
         }
     }
+
+    static let previewPokemonList: [Pokemon] = [
+        .init(
+            id: 1,
+            name: "Bulbasaur",
+            types: [.weed, .poison],
+            url: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/1.gif"
+        ),
+        .init(
+            id: 4,
+            name: "Charmander",
+            types: [.fire, .dragon],
+            url: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/4.gif"
+        ),
+        .init(
+            id: 7,
+            name: "Squirtle",
+            types: [.water],
+            url: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/7.gif"
+        )
+    ]
 }

@@ -23,7 +23,6 @@ let package = Package(
         // If pokemon_shared is a local package in your workspace, adjust the path accordingly.
         .package(name: "pokemon_shared", path: "../pokemon_shared"),
         .package(name: "pokemon_design_system", path: "../pokemon_design_system"),
-        .package(name: "pokemon_data", path: "../pokemon_data"),
         .package(name: "pokemon_domain", path: "../pokemon_domain")
     ],
     targets: [
@@ -34,7 +33,6 @@ let package = Package(
             dependencies: [
                 .product(name: "pokemon_shared", package: "pokemon_shared"),
                 .product(name: "pokemon_design_system", package: "pokemon_design_system"),
-                .product(name: "pokemon_data", package: "pokemon_data"),
                 .product(name: "pokemon_domain", package: "pokemon_domain")
             ]
         ),
@@ -44,4 +42,3 @@ let package = Package(
         ),
     ]
 )
-
