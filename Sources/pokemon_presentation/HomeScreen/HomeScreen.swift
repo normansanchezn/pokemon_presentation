@@ -6,22 +6,28 @@
 //
 
 import SwiftUI
+import Foundation
 import pokemon_shared
 import pokemon_design_system
 
 public struct HomeScreen: View {
-    private let pokemonList: [Pokemon]
+    @StateObject private var viewModel: HomeViewModel
+    private let onEffect: (OnPokemonSelectedEffect) -> Void
 
-    public init() {
-        self.pokemonList = Self.previewPokemonList
-    }
-
-    public init(pokemonList: [Pokemon]) {
-        self.pokemonList = pokemonList
+    public init(
+        viewModel: @autoclosure @escaping() -> HomeViewModel,
+        onEffect: @escaping (OnPokemonSelectedEffect) -> Void) {
+        _viewModel = StateObject(wrappedValue: viewModel())
+        self.onEffect = onEffect
     }
 
     public var body: some View {
         createContentView()
+            .onAppear {
+                Task {
+                    try await viewModel.onAppear()   
+                }
+            }
     }
     
     private func createContentView() -> some View {
@@ -55,7 +61,7 @@ public struct HomeScreen: View {
     
     private func createMenuPokemon() -> some View {
         VStack {
-            ForEach(pokemonList, id: \.id) { pokemon in
+            ForEach(viewModel.state.pokemonList, id: \.id) { pokemon in
                 PokemonCard(content: createPokemonItem(pokemon: pokemon))
             }
         }
@@ -71,25 +77,4 @@ public struct HomeScreen: View {
             ListPokemonType(pokeTypes: pokemon.types)
         }
     }
-
-    static let previewPokemonList: [Pokemon] = [
-        .init(
-            id: 1,
-            name: "Bulbasaur",
-            types: [.weed, .poison],
-            url: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/1.gif"
-        ),
-        .init(
-            id: 4,
-            name: "Charmander",
-            types: [.fire, .dragon],
-            url: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/4.gif"
-        ),
-        .init(
-            id: 7,
-            name: "Squirtle",
-            types: [.water],
-            url: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/7.gif"
-        )
-    ]
 }
