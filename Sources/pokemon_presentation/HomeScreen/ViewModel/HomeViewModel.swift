@@ -15,6 +15,7 @@ public struct HomeUIState: Equatable {
     public let title: String = "Pokemon Menu"
     public let subtitle: String = ""
     public var pokemonList: [Pokemon] = []
+    public var loading: Bool = false
 
     public init() {}
 }
@@ -34,9 +35,11 @@ public final class HomeViewModel: ObservableObject {
         guard state.pokemonList.isEmpty else { return }
 
         do {
+            state.loading = true
             let pokemonList = try await fetchPokemonListUseCase.execute()
             await MainActor.run {
                 state.pokemonList = pokemonList
+                state.loading = false
             }
             
         } catch {

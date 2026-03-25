@@ -22,59 +22,75 @@ public struct HomeScreen: View {
     }
 
     public var body: some View {
-        createContentView()
-            .onAppear {
-                Task {
-                    try await viewModel.onAppear()   
+        PokemonBackground {
+            VStack(spacing: 0) {
+                createHeaderMenu()
+                if viewModel.state.loading {
+                    VStack {
+                        Spacer(minLength: 0)
+                        PokeballLoader(size: 100)
+                        Spacer(minLength: 0)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    createContentView()
+                        .onAppear {
+                            Task {
+                                try await viewModel.onAppear()
+                            }
+                        }
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        }
     }
     
     private func createContentView() -> some View {
-        PokemonBackground {
-            ScrollView {
-                createHeaderMenu()
-                createMenuPokemon()
-            }
+        ScrollView {
+            createMenuPokemon()
+                .padding(.horizontal, 16)
         }
+        .padding(.top, 16)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+    
+    private func createHomeHeader() -> some View {
+        HStack {
+            Text("Pokemon API")
+                .foregroundStyle(Color.white)
+                .bold()
+                .font(.largeTitle)
+                .padding(.horizontal, 20)
+            Spacer()
+        }
+    }
+    
+    private func createSubHeadLineHomeScreen() -> some View {
+        HStack {
+            Text("Select a Pokemon to see more deatils")
+                .foregroundStyle(Color.white)
+                .font(.subheadline)
+            Spacer()
+        }.padding(.horizontal, 20)
     }
     
     private func createHeaderMenu() -> some View {
         VStack(spacing: 0) {
-            HStack {
-                Text("Menu Pokemon")
-                    .foregroundStyle(Color.white)
-                    .bold()
-                    .font(.largeTitle)
-                    .padding(.horizontal, 20)
-                Spacer()
-            }
-            HStack {
-                Text("Selecciona un pokémon para saber más información")
-                    .foregroundStyle(Color.white)
-                    .font(.title3)
-                    .padding()
-                Spacer()
-            }
+            PokemonCard(
+                contentView: {
+                    VStack(alignment: .center, spacing: 0) {
+                        createHomeHeader()
+                        createSubHeadLineHomeScreen()
+                    }
+                    .frame(maxWidth: .infinity, alignment: .center)
+                },
+                backgroundColor: Color.red
+            )
+            .padding(.horizontal, 20)
         }
     }
     
     private func createMenuPokemon() -> some View {
-        VStack {
-            ForEach(viewModel.state.pokemonList, id: \.id) { pokemon in
-                PokemonCard(content: createPokemonItem(pokemon: pokemon))
-            }
-        }
-    }
-    
-    private func createPokemonItem(pokemon: Pokemon) -> some View {
-        VStack(spacing: 0) {
-            PokemonImage(pokeUrl: pokemon.url)
-        
-            Text("\(pokemon.name.capitalized)")
-                .foregroundStyle(Color.black)
-                .font(Font.title2.bold())
-            ListPokemonType(pokeTypes: pokemon.types)
-        }
+        PokemonGridView(pokemons: viewModel.state.pokemonList)
     }
 }
