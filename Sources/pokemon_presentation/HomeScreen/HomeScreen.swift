@@ -11,25 +11,24 @@ import pokemon_shared
 import pokemon_design_system
 
 public struct HomeScreen: View {
-    @StateObject private var viewModel: HomeViewModel
+    @ObservedObject private var viewModel: HomeViewModel
     private let onEffect: (OnPokemonSelectedEffect) -> Void
 
     public init(
-        viewModel: @autoclosure @escaping() -> HomeViewModel,
-        onEffect: @escaping (OnPokemonSelectedEffect) -> Void) {
-        _viewModel = StateObject(wrappedValue: viewModel())
+        viewModel: HomeViewModel,
+        onEffect: @escaping (OnPokemonSelectedEffect) -> Void
+    ) {
+        _viewModel = ObservedObject(wrappedValue: viewModel)
         self.onEffect = onEffect
     }
 
     public var body: some View {
         PokemonBackground {
-            VStack(spacing: 16) {
-                createHeaderMenu()
-                createSearchField()
+            ZStack(alignment: .top) {
                 contentView
+                topChrome
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            .padding(.top, 16)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .task {
             try? await viewModel.onAppear()
@@ -68,6 +67,7 @@ public struct HomeScreen: View {
     private func createContentView() -> some View {
         ScrollView {
             createMenuPokemon()
+                .padding(.top, 128)
                 .padding(.horizontal, 16)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -103,36 +103,21 @@ public struct HomeScreen: View {
         }.padding(.horizontal, 20)
     }
     
-    private func createHeaderMenu() -> some View {
+    private var topChrome: some View {
+        VStack(spacing: 14) {
+            leadingChrome
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 16)
+    }
+
+    private var leadingChrome: some View {
         VStack(spacing: 0) {
             createHomeHeader()
             createSubHeadLineHomeScreen()
         }
-        .frame(maxWidth: .infinity, alignment: .center)
         .padding()
         .glassEffect()
-    }
-
-    private func createSearchField() -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: "magnifyingglass")
-                .foregroundStyle(.secondary)
-
-            TextField(
-                "Search pokemon",
-                text: Binding(
-                    get: { viewModel.state.searchQuery },
-                    set: { viewModel.updateSearchQuery($0) }
-                )
-            )
-            .autocorrectionDisabled()
-            .submitLabel(.search)
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 14)
-        .frame(maxWidth: .infinity)
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20))
-        .padding(.horizontal, 20)
     }
     
     private func createMenuPokemon() -> some View {

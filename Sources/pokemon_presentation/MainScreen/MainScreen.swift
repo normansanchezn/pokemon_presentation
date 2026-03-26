@@ -9,18 +9,10 @@ import SwiftUI
 import pokemon_domain
 import pokemon_shared
 
-private enum MainTab: Hashable {
-    case home
-    case regions
-    case favs
-    case more
-}
-
 public struct MainScreen: View {
-    @State private var selectedTab: MainTab = .home
-
     private let homeViewModel: HomeViewModel
     private let onEffect: (OnPokemonSelectedEffect) -> Void
+    @State private var isSearchPresented = false
 
     public init(
         homeViewModel: HomeViewModel,
@@ -31,34 +23,59 @@ public struct MainScreen: View {
     }
 
     public var body: some View {
-        TabView(selection: $selectedTab) {
-            HomeScreen(
-                viewModel: homeViewModel,
-                onEffect: onEffect
-            )
-            .tabItem {
-                Label("Pokedex", systemImage: "house.lodge")
-            }
-            .tag(MainTab.home)
-
-            placeholder(title: "Regions", systemImage: "mappin.and.ellipse")
-                .tabItem {
-                    Label("Regions", systemImage: "mappin.and.ellipse")
-                }
-                .tag(MainTab.regions)
-
-            placeholder(title: "Favs", systemImage: "heart.fill")
-                .tabItem {
-                    Label("Favs", systemImage: "heart.fill")
-                }
-                .tag(MainTab.favs)
-
-            placeholder(title: "More", systemImage: "ellipsis")
-                .tabItem {
-                    Label("More", systemImage: "ellipsis")
-                }
-                .tag(MainTab.more)
+        #if os(iOS)
+        Group {
+            tabView
+                .tabBarMinimizeBehavior(.onScrollDown)
         }
+        #else
+        tabView
+        #endif
+    }
+
+    private var tabView: some View {
+        TabView {
+            Tab("Pokedex", systemImage: "house.lodge") {
+                HomeScreen(
+                    viewModel: homeViewModel,
+                    onEffect: onEffect
+                )
+            }
+
+            Tab("Regions", systemImage: "mappin.and.ellipse") {
+                placeholder(title: "Regions", systemImage: "mappin.and.ellipse")
+            }
+
+            Tab("Favs", systemImage: "heart.fill") {
+                placeholder(title: "Favs", systemImage: "heart.fill")
+            }
+
+            Tab("More", systemImage: "ellipsis") {
+                placeholder(title: "More", systemImage: "ellipsis")
+            }
+
+            Tab(role: .search) {
+                NavigationStack {
+                    HomeScreen(
+                        viewModel: homeViewModel,
+                        onEffect: onEffect
+                    )
+                }
+            }
+        }
+        .searchable(
+            text: searchQueryBinding,
+            isPresented: $isSearchPresented,
+            prompt: "Search pokemon"
+        )
+        .tabViewSearchActivation(.searchTabSelection)
+    }
+
+    private var searchQueryBinding: Binding<String> {
+        Binding(
+            get: { homeViewModel.state.searchQuery },
+            set: { homeViewModel.updateSearchQuery($0) }
+        )
     }
 
     private func placeholder(title: String, systemImage: String) -> some View {
