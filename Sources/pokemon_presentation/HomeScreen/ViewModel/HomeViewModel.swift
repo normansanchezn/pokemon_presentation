@@ -36,6 +36,9 @@ public final class HomeViewModel: ObservableObject {
     public let effects = PassthroughSubject<OnPokemonSelectedEffect, Never>()
     
     private let fetchPokemonListUseCase: FetchPokemonListUseCase
+    private let pageSize = 24
+    private var allPokemonList: [Pokemon] = []
+    private var didLoadInitialPokemonList = false
     
     public init(fetchPokemonListUseCase: FetchPokemonListUseCase) {
         self.fetchPokemonListUseCase = fetchPokemonListUseCase
@@ -51,27 +54,43 @@ public final class HomeViewModel: ObservableObject {
             return state.pokemonList
         }
 
-        return state.pokemonList.filter {
+        return allPokemonList.filter {
             $0.name.localizedCaseInsensitiveContains(query)
         }
     }
+
+    public func loadNextPageIfNeeded(currentPokemon: Pokemon) {
+        guard state.searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        guard currentPokemon.id == state.pokemonList.last?.id else { return }
+        guard state.pokemonList.count < allPokemonList.count else { return }
+
+        let nextPageCount = min(state.pokemonList.count + pageSize, allPokemonList.count)
+        state.pokemonList = Array(allPokemonList.prefix(nextPageCount))
+    }
     
     public func onAppear() async throws {
-        guard state.pokemonList.isEmpty else { return }
+        guard !didLoadInitialPokemonList else { return }
+
+        state.loading = true
+        state.error = nil
+        state.isEmpty = false
+        defer {
+            state.loading = false
+        }
 
         do {
-            state.loading = true
             let pokemonList = try await fetchPokemonListUseCase.execute()
-            if (pokemonList.isEmpty) {
+            didLoadInitialPokemonList = true
+            allPokemonList = pokemonList
+
+            guard !pokemonList.isEmpty else {
                 state.isEmpty = true
+                state.pokemonList = []
                 return
-            } else {
-                state.isEmpty = false
             }
-            await MainActor.run {
-                state.pokemonList = pokemonList
-                state.loading = false
-            }
+
+            state.isEmpty = false
+            state.pokemonList = Array(pokemonList.prefix(pageSize))
             
         } catch {
             state.isEmpty = true

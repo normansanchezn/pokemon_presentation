@@ -9,5 +9,5 @@ import pokemon_shared
 import SwiftUI
 
 public enum OnPokemonSelectedEffect: Equatable {
-    case pokemonSelected(pokemonSelected: Pokemon)
+    case pokemonSelected(pokemonIDSelected: Int)
 }
