@@ -12,7 +12,6 @@ import pokemon_shared
 public struct MainScreen: View {
     private let homeViewModel: HomeViewModel
     private let onEffect: (OnPokemonSelectedEffect) -> Void
-    @State private var isSearchPresented = false
 
     public init(
         homeViewModel: HomeViewModel,
@@ -35,7 +34,7 @@ public struct MainScreen: View {
 
     private var tabView: some View {
         TabView {
-            Tab("Pokedex", systemImage: "house.lodge") {
+            Tab("Pokedex", systemImage: "house") {
                 HomeScreen(
                     viewModel: homeViewModel,
                     onEffect: onEffect
@@ -53,29 +52,7 @@ public struct MainScreen: View {
             Tab("More", systemImage: "ellipsis") {
                 placeholder(title: "More", systemImage: "ellipsis")
             }
-
-            Tab(role: .search) {
-                NavigationStack {
-                    HomeScreen(
-                        viewModel: homeViewModel,
-                        onEffect: onEffect
-                    )
-                }
-            }
         }
-        .searchable(
-            text: searchQueryBinding,
-            isPresented: $isSearchPresented,
-            prompt: "Search pokemon"
-        )
-        .tabViewSearchActivation(.searchTabSelection)
-    }
-
-    private var searchQueryBinding: Binding<String> {
-        Binding(
-            get: { homeViewModel.state.searchQuery },
-            set: { homeViewModel.updateSearchQuery($0) }
-        )
     }
 
     private func placeholder(title: String, systemImage: String) -> some View {

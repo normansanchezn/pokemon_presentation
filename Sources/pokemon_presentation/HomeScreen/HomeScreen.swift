@@ -13,6 +13,7 @@ import pokemon_design_system
 public struct HomeScreen: View {
     @ObservedObject private var viewModel: HomeViewModel
     private let onEffect: (OnPokemonSelectedEffect) -> Void
+    @FocusState private var searchFocused: Bool
 
     public init(
         viewModel: HomeViewModel,
@@ -30,8 +31,10 @@ public struct HomeScreen: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .task {
-            try? await viewModel.onAppear()
+        .onAppear {
+            Task {
+                try? await viewModel.onAppear()
+            }
         }
     }
     
@@ -67,7 +70,7 @@ public struct HomeScreen: View {
     private func createContentView() -> some View {
         ScrollView {
             createMenuPokemon()
-                .padding(.top, 128)
+                .padding(.top, 190)
                 .padding(.horizontal, 16)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -106,6 +109,7 @@ public struct HomeScreen: View {
     private var topChrome: some View {
         VStack(spacing: 14) {
             leadingChrome
+            searchChrome
         }
         .padding(.horizontal, 20)
         .padding(.top, 16)
@@ -119,8 +123,43 @@ public struct HomeScreen: View {
         .padding()
         .glassEffect()
     }
+
+    private var searchChrome: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(.secondary)
+
+            TextField(
+                "Search pokemon",
+                text: Binding(
+                    get: { viewModel.state.searchQuery },
+                    set: { viewModel.updateSearchQuery($0) }
+                )
+            )
+            .focused($searchFocused)
+            .autocorrectionDisabled()
+            .submitLabel(.search)
+
+            if !viewModel.state.searchQuery.isEmpty {
+                Button {
+                    viewModel.updateSearchQuery("")
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .frame(height: 52)
+        .background(.thinMaterial, in: Capsule())
+        .glassEffect()
+        .contentShape(Capsule())
+    }
     
     private func createMenuPokemon() -> some View {
-        PokemonGridView(pokemons: viewModel.filteredPokemonList)
+        PokemonGridView(pokemons: viewModel.filteredPokemonList) { pokemon in
+            onEffect(.pokemonSelected(pokemonSelected: pokemon))
+        }
     }
 }
