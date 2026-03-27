@@ -73,9 +73,17 @@ public struct HomeScreen: View {
 
     private func createContentView() -> some View {
         ScrollView {
-            createMenuPokemon()
-                .padding(.top, theme.layout.contentTopSpacing)
-                .padding(.horizontal, theme.layout.contentHorizontalPadding)
+            VStack(spacing: theme.spacing.lg) {
+                createMenuPokemon()
+
+                if viewModel.state.loadingMore {
+                    ProgressView()
+                        .tint(theme.colors.textPrimary(for: colorScheme))
+                        .padding(.vertical, theme.spacing.md)
+                }
+            }
+            .padding(.top, theme.layout.contentTopSpacing)
+            .padding(.horizontal, theme.layout.contentHorizontalPadding)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -170,7 +178,9 @@ public struct HomeScreen: View {
         PokemonGridView(
             pokemons: viewModel.filteredPokemonList,
             onItemAppear: { pokemon in
-                viewModel.loadNextPageIfNeeded(currentPokemon: pokemon)
+                Task {
+                    await viewModel.loadNextPageIfNeeded(currentPokemon: pokemon)
+                }
             }
         ) { pokemon in
             onEffect(.pokemonSelected(pokemonIDSelected: pokemon.id))
