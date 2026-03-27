@@ -42,7 +42,7 @@ public struct MainScreen: View {
             }
 
             Tab("Regions", systemImage: "mappin.and.ellipse") {
-                placeholder(title: "Regions", systemImage: "mappin.and.ellipse")
+                RegionsScreen()
             }
 
             Tab("Favs", systemImage: "heart.fill") {

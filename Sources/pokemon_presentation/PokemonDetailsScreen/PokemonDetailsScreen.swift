@@ -191,7 +191,7 @@ public struct PokemonDetailsScreen: View {
         PokemonCard(
             contentView: {
                 VStack {
-                    Image("leaf_icon", bundle: .main)
+                    Image(heroIconName(for: pokemon.types), bundle: .main)
                         .resizable()
                         .scaledToFit()
                         .frame(width: 165, height: 165)
@@ -210,6 +210,49 @@ public struct PokemonDetailsScreen: View {
             .shadow(color: .black.opacity(0.22), radius: 18, x: 0, y: 12)
         }
 
+    }
+
+    private func heroIconName(for types: [PokemonType]) -> String {
+        switch types.first {
+        case .grass:
+            return "leaf_icon"
+        case .fire:
+            return "fire_icon"
+        case .water:
+            return "water_icon"
+        case .electric:
+            return "electric_icon"
+        case .normal:
+            return "normal_icon"
+        case .fighting:
+            return "fighting_icon"
+        case .flying:
+            return "flying_icon"
+        case .poison:
+            return "poison_icon"
+        case .ground:
+            return "ground_icon"
+        case .rock:
+            return "rock_icon"
+        case .psychic:
+            return "psychic_icon"
+        case .ice:
+            return "ice_icon"
+        case .dragon:
+            return "dragon_icon"
+        case .dark:
+            return "dark_icon"
+        case .bug:
+            return "bug_icon"
+        case .ghost:
+            return "ghost_icon"
+        case .steel:
+            return "steel_icon"
+        case .fairy:
+            return "fairy_icon"
+        case nil:
+            return "normal_icon"
+        }
     }
 }
 
