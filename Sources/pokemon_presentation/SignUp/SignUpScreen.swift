@@ -13,14 +13,11 @@ public struct SignUpScreen: View {
     @Environment(\.pokemonTheme) private var theme
     @Environment(\.colorScheme) private var colorScheme
     @ObservedObject private var viewModel: SignUpViewModel
-    private let onContinue: () -> Void
     
     public init(
-        viewModel: SignUpViewModel,
-        onContinue: @escaping () -> Void = {}
+        viewModel: SignUpViewModel
     ) {
         self.viewModel = viewModel
-        self.onContinue = onContinue
     }
     
     public var body: some View {
@@ -34,46 +31,26 @@ public struct SignUpScreen: View {
             }
         }
         .ignoresSafeArea()
-        .onReceive(viewModel.effects) { effect in
-            switch effect {
-            case .continueSignUp:
-                onContinue()
-            }
-        }
     }
     
     private var content: some View {
         VStack(alignment: .center, spacing: 12) {
-            Image("sign_up_img")
+            Spacer()
+            Image(viewModel.state.imageResource)
                 .padding(.top, 20)
             PokemonCard {
                 VStack(alignment:.leading) {
-                    Text("All pokemon on the same place")
-                        .font(theme.typography.hero.bold())
-                        .foregroundStyle(theme.colors.textPrimary(for: colorScheme))
-                    Text("You can access to hole pokemon list and more.")
-                        .font(theme.typography.subtitle.bold())
-                        .foregroundStyle(theme.colors.textSecondary(for: colorScheme))
+                    PokemonTitle(title: viewModel.state.titleScreen)
+                    PokemonSubTitle(subtitle: viewModel.state.subTitleScreen)
                 }
                 .padding(.horizontal, 20)
                 .padding(.vertical, 10)
             }
             .padding(.horizontal, 20)
             Spacer()
-            Button(action: {
+            PokemonButton(buttonText: viewModel.state.btnContinueTitle, style: .primary, action: {
                 viewModel.effects.send(.continueSignUp)
-            }, label: {
-                Text(viewModel.state.btnContinueTitle)
-                    .font(theme.typography.headline.bold())
-                    .foregroundStyle(theme.colors.textPrimary(for: colorScheme))
             })
-            .padding()
-            .frame(maxWidth: .infinity)
-            .background {
-                Capsule().fill(Color.blue.opacity(0.3))
-                    .glassEffect()
-            }
-            .padding(20)
         }
     }
     
