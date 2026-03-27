@@ -10,4 +10,5 @@ import pokemon_shared
 
 public enum OnPokemonSelectedEffect: Equatable {
     case pokemonSelected(pokemonIDSelected: Int)
+    case goToSignUpView
 }

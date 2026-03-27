@@ -14,6 +14,7 @@ public struct HomeScreen: View {
     @ObservedObject private var viewModel: HomeViewModel
     private let onEffect: (OnPokemonSelectedEffect) -> Void
     @FocusState private var searchFocused: Bool
+    @State private var didRequestSignUp = false
     @Environment(\.pokemonTheme) private var theme
     @Environment(\.colorScheme) private var colorScheme
 
@@ -26,17 +27,33 @@ public struct HomeScreen: View {
     }
 
     public var body: some View {
+        homeContent
+            .onAppear {
+                if viewModel.state.hasAccount {
+                    Task {
+                        try? await viewModel.onAppear()
+                    }
+                } else if !didRequestSignUp {
+                    didRequestSignUp = true
+                    onEffect(.goToSignUpView)
+                }
+            }
+            .onChange(of: viewModel.state.hasAccount) { _, newValue in
+                if newValue {
+                    Task {
+                        try? await viewModel.onAppear()
+                    }
+                }
+            }
+    }
+
+    private var homeContent: some View {
         PokemonBackground {
             ZStack(alignment: .top) {
                 contentView
                 topChrome
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-        }
-        .onAppear {
-            Task {
-                try? await viewModel.onAppear()
-            }
         }
     }
     
@@ -128,12 +145,15 @@ public struct HomeScreen: View {
     }
 
     private var leadingChrome: some View {
-        VStack(spacing: 0) {
-            createHomeHeader()
-            createSubHeadLineHomeScreen()
+        ZStack {
+            VStack(spacing: 0) {
+                createHomeHeader()
+                createSubHeadLineHomeScreen()
+            }
+            .padding(theme.spacing.md)
+            .glassEffect()
         }
-        .padding(theme.spacing.md)
-        .glassEffect()
+        .frame(maxWidth: .infinity)
     }
 
     private var searchChrome: some View {

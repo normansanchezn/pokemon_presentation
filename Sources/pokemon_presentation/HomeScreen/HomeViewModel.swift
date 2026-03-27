@@ -30,6 +30,10 @@ public final class HomeViewModel: ObservableObject {
         state.searchQuery = searchQuery
     }
 
+    public func setHasAccount(_ hasAccount: Bool) {
+        state.hasAccount = hasAccount
+    }
+
     public var filteredPokemonList: [Pokemon] {
         let query = state.searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !query.isEmpty else {

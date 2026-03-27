@@ -17,6 +17,7 @@ public struct HomeUIState: Equatable {
     public var isEmpty: Bool = false
     public var error: PokedexError? = nil
     public var searchQuery: String = ""
+    public var hasAccount: Bool = false
 
     public init() {}
 }
