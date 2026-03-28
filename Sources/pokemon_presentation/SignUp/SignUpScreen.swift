@@ -7,18 +7,23 @@
 
 import SwiftUI
 import pokemon_design_system
+import Combine
 
 public struct SignUpScreen: View {
     
     @Environment(\.pokemonTheme) private var theme
     @Environment(\.colorScheme) private var colorScheme
     @ObservedObject private var viewModel: SignUpViewModel
+    private let onEffect: (SignUpEffects) -> Void
     
     public init(
-        viewModel: SignUpViewModel
+        viewModel: SignUpViewModel,
+        onEffect: @escaping (SignUpEffects) -> Void = { _ in }
     ) {
         self.viewModel = viewModel
+        self.onEffect = onEffect
     }
+
     
     public var body: some View {
         PokemonBackground {
@@ -31,16 +36,26 @@ public struct SignUpScreen: View {
             }
         }
         .ignoresSafeArea()
+        .safeAreaInset(edge: .bottom) {
+            PokemonButton(buttonText: viewModel.state.btnContinueTitle, style: .primary, action: {
+                viewModel.effects.send(.continueSignUp)
+            }, isDisabled: viewModel.state.isDisabled)
+        }
+        .onReceive(viewModel.effects) { effect in
+            onEffect(effect)
+        }
     }
     
     private var content: some View {
-        VStack(alignment: .center, spacing: 12) {
+        VStack(alignment: .center) {
             Spacer()
             Image(viewModel.state.imageResource)
                 .padding(.top, 20)
+            PokemonTitle(title: viewModel.state.titleScreen)
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 20)
             PokemonCard {
                 VStack(alignment:.leading) {
-                    PokemonTitle(title: viewModel.state.titleScreen)
                     PokemonSubTitle(subtitle: viewModel.state.subTitleScreen)
                 }
                 .padding(.horizontal, 20)
@@ -48,9 +63,6 @@ public struct SignUpScreen: View {
             }
             .padding(.horizontal, 20)
             Spacer()
-            PokemonButton(buttonText: viewModel.state.btnContinueTitle, style: .primary, action: {
-                viewModel.effects.send(.continueSignUp)
-            })
         }
     }
     
