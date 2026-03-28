@@ -28,29 +28,8 @@ public struct EmailScreen: View {
             VStack(alignment: .leading, spacing: 0) {
                 PokemonTitle(title: viewModel.state.titleText)
                 PokemonSubTitle(subtitle: viewModel.state.subtitleText)
-                Text(viewModel.state.promptText)
-                    .font(theme.typography.headline.bold())
-                    .foregroundStyle(theme.colors.textSecondary(for: colorScheme))
-                    .padding(.bottom, theme.spacing.sm)
-                
-                PokemonField(
-                    model: PokemonFieldModel(
-                        hintText: viewModel.state.fieldHintText,
-                        helperText: viewModel.state.fieldHelperText,
-                        value: Binding(
-                            get: { viewModel.email },
-                            set: { viewModel.updateEmail($0) }
-                        )
-                    )
-                )
-
-                if let validationMessage = viewModel.state.validationMessage {
-                    Text(validationMessage)
-                        .font(theme.typography.caption.bold())
-                        .foregroundStyle(theme.colors.brandRed)
-                        .padding(.top, theme.spacing.xs)
-                }
-
+                    .padding(.bottom, 20)
+                emailFieldSection
                 Spacer()
             }
             .padding(.horizontal, 30)
@@ -62,14 +41,44 @@ public struct EmailScreen: View {
             onEffect(effect)
         }
         .safeAreaBar(edge: .bottom, content: {
-            PokemonButton(
-                buttonText: viewModel.state.continueButtonTitle,
-                style: .primary,
-                action: {
-                    viewModel.onContinueButtonListener()
-                },
-                isDisabled: viewModel.state.isContinueButtonDisabled
-            )
+            continueButton
         })
+    }
+    
+    private var continueButton: some View {
+        PokemonButton(
+            buttonText: viewModel.state.continueButtonTitle,
+            style: .primary,
+            action: {
+                viewModel.onContinueButtonListener()
+            },
+            isDisabled: viewModel.state.isContinueButtonDisabled
+        )
+    }
+    
+    private var emailFieldSection: some View {
+        PokemonCard {
+            VStack(alignment: .leading) {
+                Text(viewModel.state.promptText)
+                    .font(theme.typography.headline.bold())
+                    .foregroundStyle(theme.colors.textSecondary(for: colorScheme))
+                
+                PokemonField(
+                    model: PokemonFieldModel(
+                        hintText: viewModel.state.fieldHintText,
+                        helperText: viewModel.state.fieldHelperText,
+                        errorMessage: Binding(
+                            get: { viewModel.errorMessage },
+                            set: { viewModel.updateErrorMessage($0) }
+                        ),
+                        value: Binding(
+                            get: { viewModel.email },
+                            set: { viewModel.updateEmail($0) }
+                        )
+                    )
+                )
+            }
+            .padding(16)
+        }
     }
 }

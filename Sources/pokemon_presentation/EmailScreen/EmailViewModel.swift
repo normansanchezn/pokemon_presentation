@@ -14,6 +14,7 @@ public final class EmailViewModel: ObservableObject {
     
     @Published public private(set) var state = EmailUIState()
     @Published public private(set) var email: String = ""
+    @Published public private(set) var errorMessage: String = ""
 
     public let effects = PassthroughSubject<EmailViewModelEffects, Never>()
     
@@ -28,19 +29,28 @@ public final class EmailViewModel: ObservableObject {
         validateEmail(newValue)
     }
     
+    public func updateErrorMessage(_ newValue: String) {
+        errorMessage = newValue
+        validateEmail(email)
+    }
+    
     public func validateEmail(_ rawEmail: String) {
         let trimmedEmail = rawEmail.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        guard !trimmedEmail.isEmpty else {
-            state.validationMessage = nil
-            state.isContinueButtonDisabled = true
+        if Self.isValidEmail(trimmedEmail) {
+            state.isContinueButtonDisabled = false
+            errorMessage = ""
             return
         }
-
-        let isValid = Self.isValidEmail(trimmedEmail)
-
-        state.validationMessage = isValid ? nil : state.invalidEmailMessage
-        state.isContinueButtonDisabled = !isValid
+        if !trimmedEmail.isEmpty && !Self.isValidEmail(trimmedEmail) {
+            state.isContinueButtonDisabled = true
+            errorMessage = "Please enter a valid email"
+            return
+        }
+        if trimmedEmail.isEmpty {
+            state.isContinueButtonDisabled = false
+            errorMessage = ""
+        }
     }
 
     public func onContinueButtonListener() {

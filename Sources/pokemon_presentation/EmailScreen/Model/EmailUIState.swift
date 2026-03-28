@@ -16,7 +16,7 @@ public struct EmailUIState {
     public let continueButtonTitle = "Continue"
     public let emptyEmailMessage = "Please enter your email address."
     public let invalidEmailMessage = "Please enter a valid email address."
-    public var validationMessage: String? = nil
+    public var validationMessage: String = ""
     public var isContinueButtonDisabled: Bool = true
     public var isLoading: Bool = false
 
