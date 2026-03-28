@@ -8,5 +8,5 @@
 import Foundation
 
 public enum EmailViewModelEffects: Equatable {
-    case createAccount
+    case goToPasswordScreen
 }

@@ -62,14 +62,14 @@ public struct EmailScreen: View {
                 Text(viewModel.state.promptText)
                     .font(theme.typography.headline.bold())
                     .foregroundStyle(theme.colors.textSecondary(for: colorScheme))
-                
+
                 PokemonField(
                     model: PokemonFieldModel(
                         hintText: viewModel.state.fieldHintText,
                         helperText: viewModel.state.fieldHelperText,
                         errorMessage: Binding(
-                            get: { viewModel.errorMessage },
-                            set: { viewModel.updateErrorMessage($0) }
+                            get: { viewModel.state.validationMessage },
+                            set: { _ in }
                         ),
                         value: Binding(
                             get: { viewModel.email },
